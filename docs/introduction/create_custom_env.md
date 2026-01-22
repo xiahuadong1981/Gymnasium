@@ -3,8 +3,6 @@
 标题： 创建自定义环境
 ---
 
-翻译如下：
-
 # 创建自定义环境
 
 ## 编码前：环境设计
@@ -83,12 +81,13 @@
 ```{eval-rst}
 .. py:currentmodule:: gymnasium.spaces
 
-For our observation, we have several options. We could represent the full grid as a 2D array, or use coordinate positions, or even a 3D array with separate "layers" for agent and target. For this tutorial, we'll use a simple dictionary format like ``{"agent": array([1, 0]), "target": array([0, 3])}`` where the arrays represent x,y coordinates.
+对于我们的观测空间，我们有几种选择。我们可以将整个网格表示为一个二维数组，或者使用坐标位置，甚至使用一个包含单独“层”的三维数组来表示代理和目标。对于本教程，我们将使用一个简单的字典格式，例如 `{"agent": array([1, 0]), "target": array([0, 3])}`，其中数组表示 x,y 坐标。
 
-This choice makes the observation human-readable and easy to debug. We'll declare this as a :class:`Dict` space with the agent and target spaces being :class:`Box` spaces that contain integer coordinates.
+这种选择使得观测空间更加易于人类阅读并且便于调试。我们将其声明为一个 :class:`Dict` 空间，其中代理和目标空间是 :class:`Box` 空间，包含整数坐标。
+
 ```
 
-For a full list of possible spaces to use with an environment, see [spaces](../api/spaces)
+有关可以与环境一起使用的所有空间的完整列表，请参见 [spaces](../api/spaces)。
 
 ```python
 from typing import Optional
@@ -129,12 +128,13 @@ class GridWorldEnv(gym.Env):
         }
 ```
 
-## Constructing Observations
+## 构建观测空间
 
 ```{eval-rst}
 .. py:currentmodule:: gymnasium
 
-Since we need to compute observations in both :meth:`Env.reset` and :meth:`Env.step`, it's convenient to have a helper method ``_get_obs`` that translates the environment's internal state into the observation format. This keeps our code DRY (Don't Repeat Yourself) and makes it easier to modify the observation format later.
+由于我们需要在 :meth:`Env.reset` 和 :meth:`Env.step` 中计算观测空间，因此拥有一个辅助方法 `_get_obs` 来将环境的内部状态转换为观测格式是很方便的。这可以保持我们的代码遵循 DRY（不要重复自己）原则，并且使以后修改观测格式更加容易。
+
 ```
 
 ```python
@@ -150,7 +150,8 @@ Since we need to compute observations in both :meth:`Env.reset` and :meth:`Env.s
 ```{eval-rst}
 .. py:currentmodule:: gymnasium
 
-We can also implement a similar method for auxiliary information returned by :meth:`Env.reset` and :meth:`Env.step`. In our case, we'll provide the Manhattan distance between agent and target - this can be useful for debugging and understanding agent progress, but shouldn't be used by the learning algorithm itself.
+我们还可以为 :meth:`Env.reset` 和 :meth:`Env.step` 返回的辅助信息实现一个类似的方法。在我们的例子中，我们将提供代理和目标之间的曼哈顿距离——这对于调试和理解代理的进展非常有用，但不应被学习算法本身使用。
+
 ```
 
 ```python
@@ -170,7 +171,7 @@ We can also implement a similar method for auxiliary information returned by :me
 ```{eval-rst}
 .. py:currentmodule:: gymnasium
 
-Sometimes info will contain data that's only available inside :meth:`Env.step` (like individual reward components, action success/failure, etc.). In those cases, we'd update the dictionary returned by ``_get_info`` directly in the step method.
+有时，info 会包含仅在 :meth:`Env.step` 内部可用的数据（如单独的奖励组成部分、动作成功/失败等）。在这种情况下，我们会直接在 step 方法中更新 `_get_info` 返回的字典。
 ```
 
 ## Reset function
@@ -178,9 +179,10 @@ Sometimes info will contain data that's only available inside :meth:`Env.step` (
 ```{eval-rst}
 .. py:currentmodule:: gymnasium.Env
 
-The :meth:`reset` method starts a new episode. It takes two optional parameters: ``seed`` for reproducible random generation and ``options`` for additional configuration. On the first line, you must call ``super().reset(seed=seed)`` to properly initialize the random number generator.
+:meth:`reset` 方法开始一个新的回合。它有两个可选参数：`seed` 用于可重复的随机生成，`options` 用于额外的配置。在第一行，你必须调用 `super().reset(seed=seed)` 来正确初始化随机数生成器。
 
-In our GridWorld environment, :meth:`reset` randomly places the agent and target on the grid, ensuring they don't start in the same location. We return both the initial observation and info as a tuple.
+在我们的 GridWorld 环境中，:meth:`reset` 会随机将代理和目标放置在网格上，并确保它们不会在同一位置开始。我们将初始观测空间和信息作为元组返回。
+
 ```
 
 ```python
@@ -218,14 +220,15 @@ In our GridWorld environment, :meth:`reset` randomly places the agent and target
 ```{eval-rst}
 .. py:currentmodule:: gymnasium.Env
 
-The :meth:`step` method contains the core environment logic. It takes an action, updates the environment state, and returns the results. This is where the physics, game rules, and reward logic live.
+:meth:`step` 方法包含核心的环境逻辑。它接受一个动作，更新环境状态，并返回结果。这里包含了物理学、游戏规则和奖励逻辑。
 
-For GridWorld, we need to:
-1. Convert the discrete action to a movement direction
-2. Update the agent's position (with boundary checking)
-3. Calculate the reward based on whether the target was reached
-4. Determine if the episode should end
-5. Return all the required information
+对于 GridWorld，我们需要：
+
+1. 将离散动作转换为移动方向
+2. 更新代理的位置（并进行边界检查）
+3. 根据是否到达目标来计算奖励
+4. 确定回合是否结束
+5. 返回所有必要的信息
 ```
 
 ```python
